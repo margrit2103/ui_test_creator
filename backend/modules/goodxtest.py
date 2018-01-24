@@ -151,7 +151,7 @@ class goodxtest():
                     "index": index,
                     "action": action["action"],
                     "data": action["data"],
-                    "error": str(ex)
+                    "error": str(ex) if str(ex).index('C://') > 0 else "Could not find image in path " + str(ex)
                 })
         return test_result
 
