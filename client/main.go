@@ -1,12 +1,9 @@
 package main
 
-import (
-	"log"
-	"net/http"
-)
+import "fmt"
 
-// main function to boot up everything
+// main function to start up client
 func main() {
-	router := NewRouter()
-	log.Fatal(http.ListenAndServe(":8000", router))
+	fmt.Println("Starting Client...")
+	api()
 }
