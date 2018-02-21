@@ -3,7 +3,7 @@ import { BackendService } from '@backend';
 import * as $ from 'jquery';
 import { AutocompleteComponent, Confirm } from '@utils';
 import { Test } from '@models';
-import { Screen } from '@screens';
+import { Screen, ImagesScreen, screenRender } from '@screens';
 
 @Component({
     selector: 'test-screen',
@@ -12,6 +12,7 @@ import { Screen } from '@screens';
 
 export class TestScreen extends Screen implements OnInit {
     @ViewChild('nameInput') nameInput: ElementRef;
+    @ViewChild('imagesScreen') imagesScreen: screenRender;
     model: Test;
     imageList: Array<{ name: string }> = [];
 
@@ -21,12 +22,12 @@ export class TestScreen extends Screen implements OnInit {
 
     ngOnInit() {
         this.nameInput.nativeElement.focus();
-        this.backend.getImages().then(res => this.imageList = res.data);
+        setTimeout(() => this.genActionImageName(), 100);
     }
 
     removeAction(action) {
-        let popup = new Confirm("Are you sure you wish to remove this action ?", {
-            header: "Remove action Confirmation"
+        let popup = new Confirm('Are you sure you wish to remove this action ?', {
+            header: 'Remove action Confirmation'
         }, (res) => {
             if (res) {
                 this.model.actions.splice(this.model.actions.indexOf(action), 1);
@@ -35,15 +36,23 @@ export class TestScreen extends Screen implements OnInit {
         popup.open();
     }
 
+    Images(action) {
+        this.imagesScreen.open(null, {
+            save: model => {
+                action.data = model;
+            }
+        });
+    }
+
     moveActionIndex(action, type) {
-        let currentActionIndex = this.model.actions.indexOf(action);
+        const currentActionIndex = this.model.actions.indexOf(action);
         console.log(currentActionIndex)
         if (type === 'decrease') {
-            let previousActionIndex = this.model.actions.indexOf(action) - 1;
-            this.model.actions.splice(previousActionIndex, 2, action, this.model.actions[previousActionIndex])
+            const previousActionIndex = this.model.actions.indexOf(action) - 1;
+            this.model.actions.splice(previousActionIndex, 2, action, this.model.actions[previousActionIndex]);
         } else if (type === 'increase') {
-            let nextActionIndex = this.model.actions.indexOf(action) + 1;
-            this.model.actions.splice(currentActionIndex, 2, this.model.actions[nextActionIndex], action)
+            const nextActionIndex = this.model.actions.indexOf(action) + 1;
+            this.model.actions.splice(currentActionIndex, 2, this.model.actions[nextActionIndex], action);
         }
     }
 
@@ -55,7 +64,14 @@ export class TestScreen extends Screen implements OnInit {
         this.model.addAction();
     }
 
-    addScreenShot() {
-        this.model.addScreenShot();
+    genActionImageName() {
+        for (const action of this.model.actions) {
+            action['imageName'] = 'No Image Selected'
+            if (action.data && ['doubleclick', 'click', 'clickwait', 'rclick'].includes(action.action)) {
+                this.backend.getImages({ method: 'specific_name', value: action.data }).then(res => {
+                    action['imageName'] = res.data[0]['name']
+                })
+            }
+        }
     }
 }

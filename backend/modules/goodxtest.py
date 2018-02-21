@@ -4,15 +4,16 @@ import json
 import logging
 import os
 import sys
-from random import *
 import time
+from random import *
+
+from lib import database_manager
 
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
 
 # Global variables
 _modulename = 'goodxtest'
 DATABASE = 'goodxtest'
-SAVE_FOLDER = os.path.normpath(os.getcwd() + '/save_files/')
 
 try:
     with open("settings.json") as settings_file:
@@ -20,81 +21,139 @@ try:
 except:
     raise Exception("NO SETTINGS JSON FILE FOUND")
 
+DB_SETTINGS = SETTINGS_FILE.get("databases", [])
+
 # Class
 class goodxtest():
     def __init__(self, parent, getDatabase):
         self._parent = parent
         self.getDatabase = getDatabase
-        self.FileHandling = FileHandling()
+        self.defualt_db_conn = database_manager.DatabaseConnection(DB_SETTINGS[0])
+
+    def saveImage(self, session, image):
+        self.defualt_db_conn.executeSQL("INSERT INTO global.images (name, image) values ('{}', '{}')".format(image['name'], image['file']))
+        return 'success'
+
+    def getClients(self, session):
+        clients = self._parent.get_clients()[0]
+
+        return list(clients.keys())
 
     def getTestsCount(self, session):
-        return len(os.listdir(os.path.normpath(SAVE_FOLDER + '/tests/')))
+        testsCount = self.defualt_db_conn.executeSQLWithResult("SELECT COUNT(*) FROM global.test_cases;", ('',''))
+
+        return testsCount[0]["count"]
 
     def getSuitesCount(self, session):
-        return len(os.listdir(os.path.normpath(SAVE_FOLDER + '/suites/')))
+        testSuitesCount = self.defualt_db_conn.executeSQLWithResult("SELECT COUNT(*) FROM global.test_suites;", ('',''))
+
+        return testSuitesCount[0]["count"]
 
     def getTests(self, session):
-        tests = []
-        for file in os.listdir(os.path.normpath(SAVE_FOLDER + '/tests/')):
-            tests.append({ 'name' : file[:-5], 'type': 'test'})
+        tests = self.defualt_db_conn.executeSQLWithResult("SELECT name, description FROM global.test_cases;", ('',''))
+        tests[0]['type'] = 'test'
+
         return tests
 
     def getSuites(self, session):
-        tests = []
-        for file in os.listdir(os.path.normpath(SAVE_FOLDER + '/suites/')):
-            tests.append({ 'name': file[:-5], 'type': 'suite'})
-        return tests
+        testSuites = self.defualt_db_conn.executeSQLWithResult("SELECT name, description FROM global.test_suites;", ('',''))
+        testSuites[0]['type'] = 'suite'
 
-    def getImages(self, session):
-        images = []
-        for file in os.listdir(os.path.normpath(SAVE_FOLDER + '/images/')):
-            images.append({"name": file[:-4]})
+        return testSuites
+
+    def getImages(self, session, get_method):
+        """
+        getImages: params (self, sessoin, get_method)
+                   get_method is a object, constructed {'method': '', 'value': ''}
+                   This is handy to say get the last 10 images or 50
+                   EXMAPLE: {'method': 'last', 'value': '10'}
+        """
+        images = ''
+        method = get_method['method']
+        value = get_method['value']
+
+        if method == 'last':
+            images = self.defualt_db_conn.executeSQLWithResult("SELECT id, name, image FROM global.images ORDER BY id DESC LIMIT %s;", (value,))
+        elif method == 'specific_name':
+            images = self.defualt_db_conn.executeSQLWithResult("SELECT name FROM global.images WHERE id = %s;", (value,))
+        elif method == 'specific':
+            images = self.defualt_db_conn.executeSQLWithResult("SELECT name, image FROM global.images WHERE id = %s;", (value,))
+
         return images
 
     def saveTest(self, session, model):
-        with self.FileHandling.safe_open_w(os.path.normpath(SAVE_FOLDER + '/tests/' + model['name'] + '.json')) as fp:
-            json.dump(model, fp, indent=4)
+        self.defualt_db_conn.executeSQL("""
+            INSERT INTO global.test_cases (name, description, actions) values ('{name}', '{description}', '{actions}')
+            ON CONFLICT (name)
+            DO UPDATE SET
+                name = '{name}',
+                description = '{description}',
+                actions = '{actions}'
+            WHERE
+                test_cases.name = '{name}';
+            """.format(name=model['name'], description=model['description'], actions=json.dumps(model['actions'])))
 
     def saveTestSuite(self, session, model):
-        with self.FileHandling.safe_open_w(os.path.normpath(SAVE_FOLDER + '/suites/' + model['name'] + '.json')) as fp:
-            json.dump(model, fp, indent=4)
+        self.defualt_db_conn.executeSQL("""
+            INSERT INTO global.test_suites (name, description, tests) values ('{name}', '{description}', '{tests}')
+            ON CONFLICT (name)
+            DO UPDATE SET
+                name = '{name}',
+                description = '{description}',
+                tests = '{tests}'
+            WHERE
+                test_suites.name = '{name}';
+            """.format(name=model['name'], description=model['description'], tests=json.dumps(model['tests'])))
 
     def loadTestSuite(self, session, test_name):
         return self._load_test_suite(test_name)
 
     def _load_test_suite(self, test_name):
-        json_data = open(os.path.normpath(SAVE_FOLDER + '/suites/' + test_name + '.json')).read()
-        return json.loads(json_data)
+        test = self.defualt_db_conn.executeSQLWithResult("SELECT name, description, tests FROM global.test_suites WHERE name = %s;", (test_name,))
+        test[0]['tests'] = json.loads(test[0]['tests'])
+        test = json.dumps(test[0])
+        return json.loads(test)
 
     def loadTest(self, session, test_name):
         return self._load_test(test_name)
 
     def _load_test(self, test_name):
-        json_data = open(os.path.normpath(SAVE_FOLDER + '/tests/' + test_name + '.json')).read()
-        return json.loads(json_data)
+        test = self.defualt_db_conn.executeSQLWithResult("SELECT name, description, actions FROM global.test_cases WHERE name = %s;", (test_name,))
+        test[0]['actions'] = json.loads(test[0]['actions'])
+        test = json.dumps(test[0])
+        return json.loads(test)
 
     def runTestSuite(self, session, model):
         # sorted(list_to_be_sorted, key=lambda k: k['order'])
         # Load all the test before you begin to execute them. So that the tests are equally as fast.
-        suite_results = []
-        for index, test in enumerate(model['tests']):
-            if test['type'] == 'suite':
-                test_suite = self._load_test_suite(test['name'])
-                suite_results.append({
-                    "name": test_suite["name"],
-                    "index": index,
-                    "type": "suite",
-                    "results": self.runTestSuite(session, test_suite)
-                })
-            elif test['type'] == 'test':
-                test_ = self._load_test(test['name'])
-                suite_results.append({
-                    "name": test_["name"],
-                    "index": index,
-                    "type": "test",
-                    "results": self._run_test(test_)
-                })
-        return suite_results
+        # {'tests': [{'name': 'testing1', 'type': 'test'}, {'name': 'testin2', 'type': 'test'}], 'client': ['192.168.1.205', 49787]}
+        self._parent.send_client(model)
+        # while self._parent.suite_results == None:
+        #     time.sleep(1)
+        #     print("Waiting for test results...")
+
+        # suite_results = self._parent.suite_results
+        # self._parent.suite_results = None
+
+        # for index, test in enumerate(model['tests']):
+        #     if test['type'] == 'suite':
+        #         test_suite = self._load_test_suite(test['name'])
+        #         suite_results.append({
+        #             "name": test_suite["name"],
+        #             "index": index,
+        #             "type": "suite",
+        #             "results": self.runTestSuite(session, test_suite)
+        #         })
+        #     elif test['type'] == 'test':
+        #         test_ = self._load_test(test['name'])
+        #         suite_results.append({
+        #             "name": test_["name"],
+        #             "index": index,
+        #             "type": "test",
+        #             "results": self._run_test(test_)
+        #         })
+        # print("KKKKKKKKKKKKKKKKKKKKKKKKKKKKAAAAAAAAAAAAASSSSSSSSSSSSSSSSSSSSSSSSSS BBBBBBBBBBBBBBBBBRRRRRRRRRRRRRRRRRRAAAAAAAAAAAAAAAA!!!!!!!!!!!!!!!!!!!!")
+        # return suite_results
 
     def runTest(self, session, model):
         self._run_test(model)
@@ -186,34 +245,6 @@ class goodxtest():
     def getLoggedIn(self, session):
         return self._parent.getLoggedIn()
 
-class FileHandling:
-    """
-    Better why to handle files that needs to be saved etc.
-    The function below safe_open() take a path and will check if path exist.
-    If it doesn't, it will attempt to create the folders.
-    EXAMPLE USAGE: with safe_open_w('/Users/bill/output/output-text.txt') as f:
-                       f.write(stuff_to_file)
-    """
-    def _mkdir_p(self, path):
-        try:
-            os.makedirs(path)
-        except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else:
-                raise
-
-    def safe_open_w(self, path):
-        ''' Open "path" for writing, creating any parent directories as needed.
-        '''
-        self._mkdir_p(os.path.dirname(path))
-        return open(path, 'w')
-
-    def safe_create_path(self, path):
-        '''Create Path give if doesn't exist
-        '''
-        self._mkdir_p(os.path.dirname(path))
-        return path
 
 class TestLoader:
     """

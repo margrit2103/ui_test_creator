@@ -1,0 +1,39 @@
+<div class="col-sm-12">
+    <h4>Images Screen</h4>
+    <div style="margin-top: 10px; max-height: 60vh;">
+        <div class="row">
+            <div class="form-group col-sm-8">
+                <label class="btn btn-profile btn-file clickable" style="margin: 0; width: 100%">
+                    <i class="{{ buttonIcon }}"></i>
+                    &ensp;{{ buttonName }}
+                    <input type="file" accept="{{acceptString}}" id="filePath" (change)="saveFile()" style="display: none;">
+                </label>
+            </div>
+            <div class="col-sm-4">
+                <autocomplete></autocomplete>
+            </div>
+        </div>
+        <div class="row">
+            <div style="max-height: 50vh; overflow-y: auto; width: 100%">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th style="text-align: center;">Image</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let image of images">
+                            <td (click)="selectImage(image.id)">{{image.id}}</td>
+                            <td (click)="selectImage(image.id)">{{image.name}}</td>
+                            <td align="center">
+                                <img style="display: block; height:80px" src="{{image.image}}" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

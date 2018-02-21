@@ -42,31 +42,52 @@ class CustomWebSocketPlugin(WebSocketPlugin):
         super().start()
         self.bus.subscribe("ws-opened", self.add_socket) # Add the socket to the list when opened.
         self.bus.subscribe("ws-closed", self.del_socket) # Remove the socket from the list when the socket connection is closed.
+        self.bus.subscribe("get-clients", self.get_clients)
         self.bus.subscribe("get-client", self.get_client) # Returns a client that you want to send a message to.
         self.bus.subscribe("broadcast", self.broadcast_message) # Broadcasts a message to every client in the websocket (self.sockets) dictionary.
-
+        self.bus.subscribe("send-message", self.send_message) # Send Message to single client
+    
     def stop(self):
         super().stop()
         self.bus.unsubscribe("ws-opened", self.add_socket)
         self.bus.unsubscribe("ws-closed", self.del_socket)
+        self.bus.unsubscribe("get-clients", self.get_clients)
         self.bus.subscribe("get-client", self.get_client)
         self.bus.unsubscribe("broadcast", self.broadcast_message)
+        self.bus.unsubscribe("send-message", self.send_message)
 
-    def add_socket(self, socket, user_id):
-        self.sockets[user_id] = socket
+    def add_socket(self, socket, remote_ip):
+        # OLD PARAMS: user_id
+        # self.sockets[user_id] = socket
+        self.sockets[socket.peer_address] = socket
 
-    def del_socket(self, socket, user_id, code=0, reason="No Reason"):
-        del self.sockets[user_id]
+    def del_socket(self, socket, remote_ip, code=0, reason="No Reason"):
+        # OLD PARMS: user_id
+        # del self.sockets[user_id]
+        del self.sockets[remote_ip]
 
-    def get_client(self, user_id):
-        return self.sockets[user_id]
-    
+    def get_clients(self):
+        return self.sockets
+
+    def get_client(self, remote_ip):
+        # OLD PARAMNS: user_id
+        # return self.sockets[user_id]
+        return self.sockets[remote_ip]
+
     def broadcast_message(self, message):
-        for key, socket in self.sockets.items():
+        for socket in self.sockets:
             print('=========================== SENDIND =========================')
             print(message)
+            print(self.sockets[socket])
             print('=============================================================')
-            socket.send(message)
+            self.sockets[socket].send(message)
+
+    def send_message(self, message):
+        msg = {}
+        client = tuple(message['client'])
+        msg = message['tests']
+        print("---------------------------------------------------", msg)
+        self.sockets[client].send(json.dumps(msg))
 
 # Custom class that uses the base class EchoWebSocket of ws4py.
 class CustomWebSocket(EchoWebSocket):
@@ -76,29 +97,29 @@ class CustomWebSocket(EchoWebSocket):
 
     def opened(self):
         # This will have to change to the user_id of the user that is logged in, otherwise it can get confusing when sending to other users.
-        self.session_id = cherrypy.session.id
-        # self.session_id = cherrypy.session["user"]["user_id"]
-        cherrypy.engine.publish("ws-opened", self, self.session_id)
+        cherrypy.engine.publish("ws-opened", self, self.peer_address)
 
     def closed(self, code, reason="No Reason"):
-        cherrypy.engine.publish("ws-closed", self, self.session_id, code, reason)
+        cherrypy.engine.publish("ws-closed", self, self.peer_address, code, reason)
 
     def received_message(self, msg):
+        msg = str(msg)
         # Override the base class receive_message function in order to process this information.
-        packet = json.loads(str(msg))
-        # If the packet does not contain any user_ids to send the message to, then broadcast it to EVERY websocket connected.
-        if packet.get("to", None) is None or packet.get("to", "") == "":
-            cherrypy.engine.publish("broadcast", msg)
-        else:
-            # If its a list of user_ids iterate over them and send the message.
-            if isinstance(packet["to"], list):
-                for user_id in packet["to"]:
-                    client = cherrypy.engine.publish("get-client", user_id)
-                    client[0].send(packet["message"])
-            # If its a single string (single user) then only send it to them.
-            else:
-                client = cherrypy.engine.publish("get-client", packet["to"])
-                client[0].send(packet["message"])
+        packet = json.loads(msg)
+        print("JSON VERSION OF MESSAGE: ", packet)
+        # # If the packet does not contain any user_ids to send the message to, then broadcast it to EVERY websocket connected.
+        # if packet.get("to", None) is None or packet.get("to", "") == "":
+        #     cherrypy.engine.publish("broadcast", msg)
+        # else:
+        #     # If its a list of user_ids iterate over them and send the message.
+        #     if isinstance(packet["to"], list):
+        #         for user_id in packet["to"]:
+        #             client = cherrypy.engine.publish("get-client", user_id)
+        #             client[0].send(packet["message"])
+        #     # If its a single string (single user) then only send it to them.
+        #     else:
+        #         client = cherrypy.engine.publish("get-client", packet["to"])
+        #         client[0].send(packet["message"])
 
 class Server(object):    
     def __init__(self):
@@ -106,6 +127,7 @@ class Server(object):
         self.database_dict = {}
         self.build_modules()
         self.build_databases()
+        self.suite_result = None
 
     def build_modules(self):
         for module in os.listdir(os.getcwd()+"/modules"):
@@ -130,7 +152,6 @@ class Server(object):
             # If you want to run the database checker just run python3 main.py init, the init param is needed to start this
             if ARGUMENTS.init:
                 self.check_tables(database)
-                self.create_save_folders()
     
     def check_tables(self, database):
         db = self.database_dict[database["database_name"]]
@@ -152,23 +173,14 @@ class Server(object):
                 if len(view_) == 0:
                     logging.info("------------------------ INIT VIEW %s ------------------------"%(view["name"]))
                     db.executeSQL(view["sql"])
-    
-    def create_save_folders(self):
-        save_folder_path = os.path.normpath(os.getcwd() + '/save_files/')
-        folder_names = ['images', 'tests', 'suites']
-        for folder_name in folder_names:
-            path = os.path.normpath(save_folder_path + '/' + folder_name + '/')
-            try:
-                os.makedirs(path)
-            except OSError as exc:
-                if exc.errno == errno.EEXIST and os.path.isdir(path):
-                    pass
-                else:
-                    raise
 
     @cherrypy.expose
     def ws(self, *args, **kwargs):
         logging.info(" -------- New Websocket Created for: %s ------------"%(cherrypy.session["user"]["user_id"]))
+
+    @cherrypy.expose
+    def remote_ws(self, *args, **kwargs):
+        logging.info(" -------- New Websocket Created for: %s ------------"%(cherrypy.session))
 
     @cherrypy.expose
     def default(self, *args):
@@ -260,6 +272,16 @@ class Server(object):
             return self.database_dict[database_name]
         else:
             raise Exception("Database %s is not in the database_dict"%(database_name))
+
+
+    def send_client_all(self, msg):
+        cherrypy.engine.publish("broadcast", msg)
+    
+    def send_client(self, msg):
+        cherrypy.engine.publish("send-message", msg)
+    
+    def get_clients(self):
+        return cherrypy.engine.publish('get-clients')
 
     def doLogin(self, db=None, username=None, password=None):
         if db is None or db == "":
@@ -359,6 +381,10 @@ if __name__ == "__main__":
             "tools.staticdir.root": os.path.join(os.path.dirname(os.path.realpath(__file__)), "frontend"),
             },
             "/ws" : {
+                "tools.websocket.on": True,
+                "tools.websocket.handler_cls": CustomWebSocket
+            },
+            "/remote_ws": {
                 "tools.websocket.on": True,
                 "tools.websocket.handler_cls": CustomWebSocket
             }

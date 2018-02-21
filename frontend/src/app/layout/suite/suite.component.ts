@@ -38,7 +38,7 @@ export class SuiteComponent {
 
     runTestSuite() {
         let suite = this.selectedSuites.map(x => {
-            return {name: x.name, type: 'suite'};
+            return {Name: x.name, DataType: 'suite'};
         })
         this.backend.runTestSuite({ model: { tests: suite } });
     }

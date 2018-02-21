@@ -5,6 +5,8 @@ export * from './screenBase/screen.model';
 export * from './screens/suite/suite.component';
 export * from './screens/test/test.component';
 export * from './screens/testResult/testResult.component';
+export * from './screens/images/images.component';
+export * from './screens/clientSelection/clientSelection.component';
 // =================================================================
 export * from './screenBase/screenModels';
 export * from './screenBase/screenRender.component';

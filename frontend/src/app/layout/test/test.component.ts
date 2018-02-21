@@ -19,8 +19,9 @@ export class TestComponent {
     selectedTest: Test = null;
     selectedTests: Array<Test> = [];
     openTest: boolean = false;
-    @ViewChild("testScreen") testScreen: screenRender;
-    @ViewChild("testResultScreen") testResultScreen: screenRender;
+    @ViewChild('testScreen') testScreen: screenRender;
+    @ViewChild('testResultScreen') testResultScreen: screenRender;
+    @ViewChild('clientSelectionScreen') ClientSelectionScreen: screenRender;
 
     constructor(private backend: BackendService) { }
 
@@ -40,10 +41,16 @@ export class TestComponent {
     }
 
     runTestSuite() {
-        let test = this.selectedTests.map(x => {
-            return { name: x.name, type: 'test' };
+        const test = this.selectedTests.map(x => {
+            return { Name: x.name, DataType: 'test' };
         })
-        this.testResultScreen.open({ model: { tests: test } });
+        this.ClientSelectionScreen.open(null, {
+            save: model => {
+                const data = { model: {client: model, tests: test} }
+                console.log(data)
+                this.testResultScreen.open(data);
+            }
+        });
     }
 
     newTest() {

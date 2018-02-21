@@ -77,8 +77,12 @@ export class BackendService {
         return this.post('searchTests', {search_term: searchterm});
     }
 
-    getImages() {
-        return this.post('getImages');
+    getImages(values) {
+        return this.post('getImages', {get_method: values});
+    }
+
+    getClients() {
+        return this.post('getClients');
     }
 
     getTests() {
@@ -101,6 +105,10 @@ export class BackendService {
 
     runTestSuite(model) {
         return this.post('runTestSuite', model);
+    }
+
+    saveImage(image) {
+        return this.post('saveImage', image)
     }
 
     /**

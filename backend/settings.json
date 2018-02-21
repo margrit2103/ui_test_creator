@@ -35,17 +35,17 @@
                         },
                         {
                             "name": "test_cases",
-                            "sql": "CREATE TABLE IF NOT EXISTS global.test_cases ( id serial PRIMARY KEY, name text UNIQUE NOT NULL, description text, actions json NOT NULL)",
+                            "sql": "CREATE TABLE IF NOT EXISTS global.test_cases ( id serial PRIMARY KEY, name text UNIQUE NOT NULL, description text, actions text NOT NULL)",
                             "defaults": []
                         },
                         {
                             "name": "test_suites",
-                            "sql": "CREATE TABLE IF NOT EXISTS global.test_suites ( id serial PRIMARY KEY, name text UNIQUE NOT NULL, description text, tests json NOT NULL )",
+                            "sql": "CREATE TABLE IF NOT EXISTS global.test_suites ( id serial PRIMARY KEY, name text UNIQUE NOT NULL, description text, tests text NOT NULL )",
                             "defaults": []
                         },
                         {
                             "name": "images",
-                            "sql": "CREATE TABLE IF NOT EXISTS global.images ( id serial PRIMARY KEY, name text UNIQUE NOT NULL, image text)",
+                            "sql": "CREATE TABLE IF NOT EXISTS global.images ( id serial PRIMARY KEY, name text UNIQUE NOT NULL, image text UNIQUE NOT NULL)",
                             "defaults": []
                         }
                     ],

@@ -227,7 +227,7 @@ export abstract class DBModel {
      * @returns {Object} - JSON format of this model.
      */
     values(return_null = false) {
-        let data = {}
+        const data = {}
         this.dbFields.forEach(e => {
             if (this.modelFields.hasOwnProperty(e) && this[e] !== null) {
                 if (this[e] instanceof Array) {

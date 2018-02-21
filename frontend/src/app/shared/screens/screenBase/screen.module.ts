@@ -1,21 +1,24 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TestScreen, SuiteScreen, screenRender, TestResultScreen } from '@screens';
+import { TestScreen, SuiteScreen, screenRender, TestResultScreen, ImagesScreen, ClientSelectionScreen } from '@screens';
 import { FormsModule } from '@angular/forms';
 import { BackendService } from '@backend';
 import { AutocompleteComponent } from '@utils';
 
+
 @NgModule({
     imports: [
         CommonModule,
-        FormsModule
+        FormsModule,
     ],
     declarations: [
         screenRender,
         TestScreen,
         SuiteScreen,
         TestResultScreen,
-        AutocompleteComponent
+        AutocompleteComponent,
+        ImagesScreen,
+        ClientSelectionScreen,
     ],
     providers: [
         BackendService
@@ -24,13 +27,17 @@ import { AutocompleteComponent } from '@utils';
         TestScreen,
         SuiteScreen,
         TestResultScreen,
+        ImagesScreen,
+        ClientSelectionScreen
     ],
     exports: [
         screenRender,
         TestScreen,
         SuiteScreen,
         TestResultScreen,
-        AutocompleteComponent
+        AutocompleteComponent,
+        ImagesScreen,
+        ClientSelectionScreen
     ]
 })
 
