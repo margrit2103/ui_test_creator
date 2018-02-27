@@ -10,8 +10,8 @@ import (
 )
 
 type Data struct {
-	DataType string
-	Name     string
+	DataType string `json:"type"`
+	Name     string `json:"name"`
 }
 
 func api() {

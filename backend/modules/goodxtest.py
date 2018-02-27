@@ -192,7 +192,7 @@ class goodxtest():
     #                     pyautogui.typewrite(action['data'])
     #             if action['action'] == 'close':
     #                 for k in range(int(action.get('repeat', '1') or '1')):
-    #                     pyautogui.hotkey('alt', 'f4')
+    #                     pyautogui.hotkezy('alt', 'f4')
     #             test_result["success_actions"].append({
     #                 "index": index,
     #                 "action": action["action"],

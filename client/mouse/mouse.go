@@ -1,27 +1,44 @@
 package mouse
 
 import (
+	"encoding/base64"
 	"errors"
+	"fmt"
+	"image"
+	_ "image/png" // De
+	"log"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/go-vgo/robotgo"
 )
 
-func getImageDimension(imagePath string) (int, int) {
-	bitmap := robotgo.OpenBitmap(imagePath)
-	gbit := robotgo.ToBitmap(bitmap)
-
-	x := gbit.Width / 2
-	y := gbit.Height / 2
+func getImageDimension(bitmap robotgo.Bitmap) (int, int) {
+	x := bitmap.Width / 2
+	y := bitmap.Height / 2
 
 	return x, y
 }
 
 func Click(img, button string, double bool, delay int) (err error) {
-	image := robotgo.OpenBitmap(img)
-	xOffset, yOffset := getImageDimension(img)
-
+	fmt.Println("Test -1")
+	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(img))
+	fmt.Println("Test 0")
+	m, _, err := image.Decode(reader)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bounds := m.Bounds()
+	fmt.Println(bounds)
+	fmt.Println(reader)
+	fmt.Println("Test 1")
+	image := robotgo.OpenBitmap(reader)
+	fmt.Println("Test 2")
+	bitmap := robotgo.ToBitmap(image)
+	fmt.Println("Test 3")
+	xOffset, yOffset := getImageDimension(bitmap)
+	fmt.Println("Test 4")
 	if image != nil {
 		ticker := time.NewTicker(200 * time.Millisecond)
 		wg := sync.WaitGroup{}

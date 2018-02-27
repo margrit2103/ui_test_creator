@@ -59,8 +59,10 @@
                         <td width="40%">
                             {{test.name}}
                         </td>
-                        <td width="40%">
-                            {{test.type}}
+                        <td width="40%" *ngIf="!test.type">
+                            test
+                        <td width="40%" *ngIf="test.type">
+                                {{test.type}}
                         </td>
                         <td width="10%">
                             <button class="btn btn-sm btn-danger" (click)="removeTest(test)">

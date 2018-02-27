@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 
 	_ "github.com/lib/pq"
 	"github.com/ui_test_creator/client/keyboard"
@@ -13,7 +14,7 @@ import (
 
 type Actions struct {
 	Data        string `json:"data"`
-	Delay       string `json:"delay"`
+	Delay       int    `json:"delay"`
 	Action      string `json:"action"`
 	Repeat      int    `json:"repeat"`
 	Description string `json:"description"`
@@ -28,27 +29,70 @@ func TCase(testName string) {
 	}
 
 	// loop through json actions
-
 	for action := range actions {
 		switch actions[action].Action {
 		case "click":
-			mouse.Click()
-		case "r_click":
-			mouse.Click()
+			i, err := strconv.Atoi(actions[action].Data)
+			if err != nil {
+				panic(err)
+			}
+			image := getImages(i)
+			fmt.Println("FUCK MY LIFE 444444444444444444444444444444", image)
+			if err = mouse.Click(image, "left", false, 0); err != nil {
+				log.Fatal("MOTHER TRUCKER", err)
+			}
+		case "rclick":
+			i, err := strconv.Atoi(actions[action].Data)
+			if err != nil {
+				panic(err)
+			}
+			if err := mouse.Click(getImages(i), "right", false, 0); err != nil {
+				panic(err)
+			}
+		case "wait":
+			//create wait feature
 		case "doubleclick":
-			mouse.Click()
+			i, err := strconv.Atoi(actions[action].Data)
+			if err != nil {
+				panic(err)
+			}
+			if err := mouse.Click(getImages(i), "left", true, 0); err != nil {
+				panic(err)
+			}
 		case "clickwait":
-			mouse.Click()
+			i, err := strconv.Atoi(actions[action].Data)
+			if err != nil {
+				panic(err)
+			}
+
+			if err := mouse.Click(getImages(i), "left", false, actions[action].Delay); err != nil {
+				panic(err)
+			}
 		case "r_clickwait":
-			mouse.Click()
+			i, err := strconv.Atoi(actions[action].Data)
+			if err != nil {
+				panic(err)
+			}
+
+			if err := mouse.Click(getImages(i), "right", false, actions[action].Delay); err != nil {
+				panic(err)
+			}
 		case "doubleclickwait":
-			mouse.Click()
+			i, err := strconv.Atoi(actions[action].Data)
+			if err != nil {
+				panic(err)
+			}
+
+			if err := mouse.Click(getImages(i), "left", true, actions[action].Delay); err != nil {
+				panic(err)
+			}
 		case "type":
-			keyboard.Write()
+			keyboard.Write(actions[action].Data)
 		case "keycombo":
-			keyboard.KeyCombination()
+			fmt.Println("Keycombo running...")
+			keyboard.KeyCombination(actions[action].Data)
 		case "keypress":
-			keyboard.KeyCombination()
+			keyboard.KeyCombination(actions[action].Data)
 		}
 	}
 }
@@ -94,12 +138,14 @@ func getTestSuiteData(name string) *sql.Rows {
 	return rows
 }
 
-func getImages(ID int) *sql.Rows {
+func getImages(ID int) string {
 	db := dbConnect()
-	rows, err := db.Query(`SELECT image FROM global.images WHERE id = $1`, ID)
+	var err error
+	var image string
+	err = db.QueryRow(`SELECT image FROM global.images WHERE id=$1`, ID).Scan(&image)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return rows
+	return image
 }

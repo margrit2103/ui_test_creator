@@ -21,7 +21,6 @@ export const ACTIONS = [
     { name: 'Click and Wait', value: 'clickwait', allow_delay: true },
     { name: 'Keyboard Input', value: 'type', allow_delay: false },
     { name: 'Press Key', value: 'keypress', allow_delay: false },
-    { name: 'Close', value: 'close', allow_delay: false },
     { name: 'Double Click', value: 'doubleclick', allow_delay: false },
     { name: 'Key Combinations', value: 'keycombo', allow_delay: false }
 ];

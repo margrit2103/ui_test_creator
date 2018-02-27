@@ -42,7 +42,7 @@ export class TestComponent {
 
     runTestSuite() {
         const test = this.selectedTests.map(x => {
-            return { Name: x.name, DataType: 'test' };
+            return { name: x.name, type: 'test' };
         })
         this.ClientSelectionScreen.open(null, {
             save: model => {
