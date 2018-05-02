@@ -36,6 +36,7 @@ export class GlobalService {
 
     constructor(private backend: BackendService, private router: Router) {
         this.getUser(true); // Force the updating of the userProfile the first time the globalService starts.
+        this.createWebsocket();
     }
 
     /**

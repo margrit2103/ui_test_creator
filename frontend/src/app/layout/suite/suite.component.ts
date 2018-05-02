@@ -4,6 +4,7 @@ import { TestSuite } from '@models';
 import { BackendService } from '@backend';
 import { FormControl } from '@angular/forms';
 import { screenRender } from '@screens';
+import { GlobalService } from '@global';
 
 @Component({
     selector: 'app-suite',
@@ -18,9 +19,11 @@ export class SuiteComponent {
     selectedSuite: TestSuite = null;
     selectedSuites: Array<TestSuite> = [];
     openSuite: boolean = false;
-    @ViewChild("suiteScreen") suiteScreen: screenRender;
+    @ViewChild('suiteScreen') suiteScreen: screenRender;
+    @ViewChild('testResultScreen') testResultScreen: screenRender;
+    @ViewChild('clientSelectionScreen') ClientSelectionScreen: screenRender;
 
-    constructor(private backend: BackendService) { }
+    constructor(private backend: BackendService, public globalService: GlobalService) { }
 
     ngOnInit() {
         this.refreshSuites();
@@ -37,10 +40,20 @@ export class SuiteComponent {
     }
 
     runTestSuite() {
-        let suite = this.selectedSuites.map(x => {
-            return {name: x.name, type: 'suite'};
+        const test = this.selectedSuites.map(x => {
+            return { name: x.name, type: 'suite' };
         })
-        this.backend.runTestSuite({ model: { tests: suite } });
+        this.ClientSelectionScreen.open(null, {
+            save: model => {
+                const data = { model: {client: model, tests: test} }
+                // this.testResultScreen.open(data);
+                this.globalService.registerSub('client', 'ws',
+                    this.globalService.wsMessage.subscribe(data => this.testResultScreen.open(data, {
+                        save: () => this.globalService.unregisterSub('client', 'ws'),
+                        close: () => this.globalService.unregisterSub('client', 'ws')
+                    })));
+            }
+        });
     }
 
     newTest() {

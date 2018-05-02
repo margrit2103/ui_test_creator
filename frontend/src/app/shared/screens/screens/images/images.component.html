@@ -24,9 +24,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let image of images">
-                            <td (click)="selectImage(image.id)">{{image.id}}</td>
-                            <td (click)="selectImage(image.id)">{{image.name}}</td>
+                        <tr (click)="selectImage(image.id)" *ngFor="let image of images">
+                            <td>{{image.id}}</td>
+                            <td>{{image.name}}</td>
                             <td align="center">
                                 <img style="display: block; height:80px" src="{{image.image}}" />
                             </td>

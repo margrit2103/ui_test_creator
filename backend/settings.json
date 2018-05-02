@@ -1,8 +1,8 @@
 {
     "cherrypy": {
-        "host": "127.0.0.1",
+        "host": "192.168.2.170",
         "port": 9000,
-        "client_host": "http://127.0.0.1:4200"
+        "client_host": "http://192.168.2.170:4200"
     },
     "databases": [
         {
@@ -45,7 +45,7 @@
                         },
                         {
                             "name": "images",
-                            "sql": "CREATE TABLE IF NOT EXISTS global.images ( id serial PRIMARY KEY, name text UNIQUE NOT NULL, image text UNIQUE NOT NULL)",
+                            "sql": "CREATE TABLE IF NOT EXISTS global.images ( id serial PRIMARY KEY, name text UNIQUE NOT NULL, image text NOT NULL)",
                             "defaults": []
                         }
                     ],

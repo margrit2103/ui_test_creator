@@ -1,4 +1,4 @@
-export const wsURL = window.location.origin.includes('https') ? 'wss://' + window.location.host + '/ws' : 'ws://127.0.0.1:9000/ws';
+export const wsURL = window.location.origin.includes('https') ? 'wss://' + window.location.host + '/ws' : 'ws://192.168.2.170:9001/ws';
 
 export const URL = '/goodxtest/';
 

@@ -8,8 +8,8 @@ const routes: Routes = [
     {
         path: '',
         loadChildren: './layout/layout.module#LayoutModule',
-        canActivate: [AuthGuard],
-        canActivateChild: [AuthGuard]
+        // canActivate: [AuthGuard],
+        // canActivateChild: [AuthGuard]
     },
     {
         path: 'login',

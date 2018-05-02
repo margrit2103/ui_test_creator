@@ -30,38 +30,38 @@ class goodxtest():
         self.getDatabase = getDatabase
         self.defualt_db_conn = database_manager.DatabaseConnection(DB_SETTINGS[0])
 
-    def saveImage(self, session, image):
+    def saveImage(self, image):
         self.defualt_db_conn.executeSQL("INSERT INTO global.images (name, image) values ('{}', '{}')".format(image['name'], image['file']))
         return 'success'
 
-    def getClients(self, session):
+    def getClients(self):
         clients = self._parent.get_clients()[0]
 
         return list(clients.keys())
 
-    def getTestsCount(self, session):
+    def getTestsCount(self):
         testsCount = self.defualt_db_conn.executeSQLWithResult("SELECT COUNT(*) FROM global.test_cases;", ('',''))
 
         return testsCount[0]["count"]
 
-    def getSuitesCount(self, session):
+    def getSuitesCount(self):
         testSuitesCount = self.defualt_db_conn.executeSQLWithResult("SELECT COUNT(*) FROM global.test_suites;", ('',''))
 
         return testSuitesCount[0]["count"]
 
-    def getTests(self, session):
+    def getTests(self):
         tests = self.defualt_db_conn.executeSQLWithResult("SELECT name, description FROM global.test_cases;", ('',''))
         tests[0]['type'] = 'test'
 
         return tests
 
-    def getSuites(self, session):
+    def getSuites(self):
         testSuites = self.defualt_db_conn.executeSQLWithResult("SELECT name, description FROM global.test_suites;", ('',''))
         testSuites[0]['type'] = 'suite'
 
         return testSuites
 
-    def getImages(self, session, get_method):
+    def getImages(self, get_method):
         """
         getImages: params (self, sessoin, get_method)
                    get_method is a object, constructed {'method': '', 'value': ''}
@@ -81,7 +81,7 @@ class goodxtest():
 
         return images
 
-    def saveTest(self, session, model):
+    def saveTest(self, model):
         self.defualt_db_conn.executeSQL("""
             INSERT INTO global.test_cases (name, description, actions) values ('{name}', '{description}', '{actions}')
             ON CONFLICT (name)
@@ -93,7 +93,7 @@ class goodxtest():
                 test_cases.name = '{name}';
             """.format(name=model['name'], description=model['description'], actions=json.dumps(model['actions'])))
 
-    def saveTestSuite(self, session, model):
+    def saveTestSuite(self, model):
         self.defualt_db_conn.executeSQL("""
             INSERT INTO global.test_suites (name, description, tests) values ('{name}', '{description}', '{tests}')
             ON CONFLICT (name)
@@ -105,7 +105,7 @@ class goodxtest():
                 test_suites.name = '{name}';
             """.format(name=model['name'], description=model['description'], tests=json.dumps(model['tests'])))
 
-    def loadTestSuite(self, session, test_name):
+    def loadTestSuite(self, test_name):
         return self._load_test_suite(test_name)
 
     def _load_test_suite(self, test_name):
@@ -114,7 +114,7 @@ class goodxtest():
         test = json.dumps(test[0])
         return json.loads(test)
 
-    def loadTest(self, session, test_name):
+    def loadTest(self, test_name):
         return self._load_test(test_name)
 
     def _load_test(self, test_name):
@@ -123,11 +123,12 @@ class goodxtest():
         test = json.dumps(test[0])
         return json.loads(test)
 
-    def runTestSuite(self, session, model):
+    def runTestSuite(self, model):
+        self._parent.send_client(model)
         # sorted(list_to_be_sorted, key=lambda k: k['order'])
         # Load all the test before you begin to execute them. So that the tests are equally as fast.
         # {'tests': [{'name': 'testing1', 'type': 'test'}, {'name': 'testin2', 'type': 'test'}], 'client': ['192.168.1.205', 49787]}
-        self._parent.send_client(model)
+        # )
         # while self._parent.suite_results == None:
         #     time.sleep(1)
         #     print("Waiting for test results...")
@@ -153,10 +154,10 @@ class goodxtest():
         #             "results": self._run_test(test_)
         #         })
         # print("KKKKKKKKKKKKKKKKKKKKKKKKKKKKAAAAAAAAAAAAASSSSSSSSSSSSSSSSSSSSSSSSSS BBBBBBBBBBBBBBBBBRRRRRRRRRRRRRRRRRRAAAAAAAAAAAAAAAA!!!!!!!!!!!!!!!!!!!!")
-        # return suite_results
+        
 
-    def runTest(self, session, model):
-        self._run_test(model)
+    # def runTest(self, session, model):
+    #     self._run_test(model)
 
     # def _run_test(self, model):
     #     test_result =  {
@@ -207,7 +208,7 @@ class goodxtest():
     #             })
     #     return test_result
 
-    def searchTests(self, session, search_term):
+    def searchTests(self, search_term):
         tests = self.getTests(session)
         tests_ = []
         for test in tests:
@@ -215,7 +216,7 @@ class goodxtest():
                 tests_.append(test)
         return tests_
 
-    def searchSuites(self, session, search_term):
+    def searchSuites(self, search_term):
         suites = self.getSuites(session)
         suites_ = []
         for suite in suites:
@@ -223,26 +224,19 @@ class goodxtest():
                 suites_.append(suite)
         return suites_
 
-    def login(self, session, username, password):
-        # Ensure the user is not logged in.
-        if session is None:
-            return self._parent.doLogin(DATABASE, username, password)
+    def login(self, username, password):
+        return True
 
-        # If the user is logged in , logout the user and login again with the new session id. This is 
-        else:
-            self._parent.doLogout()
-            return self._parent.doLogin(DATABASE, username, password)
-
-    def logout(self, session):
+    def logout(self):
         if session is None:
             raise Exception('NOT LOGGED IN')
         else:
             return self._parent.doLogout()
 
-    def getUser(self, session):
+    def getUser(self):
         return self._parent.getUser()
 
-    def getLoggedIn(self, session):
+    def getLoggedIn(self):
         return self._parent.getLoggedIn()
 
 

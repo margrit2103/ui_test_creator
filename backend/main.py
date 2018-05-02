@@ -221,7 +221,7 @@ class Server(object):
                 #     self.getUser()
 
                 # Set the user of the session from the session_id cookie.
-                params_["session"] = cherrypy.session.get("user")
+                # params_["session"] = cherrypy.session.get("user")
 
                 # logging.info to know what is happening
                 logging.info("*************************** CALLING ****************************")
@@ -299,11 +299,11 @@ class Server(object):
             except:
                 pass
             cherrypy.session["user"] = { 
-                                         "username": user[0]["username"],
-                                         "user_id": user[0]["id"],
-                                         "name": user[0]["name"],
-                                         "user_groups": user[0]["user_groups"],
-                                         "session_id": cherrypy.session.id
+                                        "username": user[0]["username"],
+                                        "user_id": user[0]["id"],
+                                        "name": user[0]["name"],
+                                        "user_groups": user[0]["user_groups"],
+                                        "session_id": cherrypy.session.id
                                        }
             logging.info("******************* LOGIN SUCCESSFUL **********************")
             logging.info("USERNAME: %s; \nUSER_ID: %s; \nNAME: %s; \nPASSWORD: %s"%(user[0]["username"], user[0]["id"], user[0]["name"], user[0]["password"]))

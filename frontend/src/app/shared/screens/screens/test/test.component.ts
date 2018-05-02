@@ -18,6 +18,7 @@ export class TestScreen extends Screen implements OnInit {
 
     constructor(private backend: BackendService) {
         super();
+        this.screenName = 'Test Case Screen';
     }
 
     ngOnInit() {
@@ -40,6 +41,7 @@ export class TestScreen extends Screen implements OnInit {
         this.imagesScreen.open(null, {
             save: model => {
                 action.data = model;
+                this.genActionImageName()
             }
         });
     }

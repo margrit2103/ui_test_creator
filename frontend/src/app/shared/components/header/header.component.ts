@@ -40,6 +40,6 @@ export class HeaderComponent implements OnInit {
     }
 
     openKeyboardNinjas() {
-        window.open("https://www.keyboardninjas.co.za")
+        window.open('https://www.keyboardninjas.co.za')
     }
 }
