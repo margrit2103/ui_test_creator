@@ -3,12 +3,12 @@
  * and the websockets are all handled here.
  */
 
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BackendService } from '@backend';
 
 import { User } from '@models';
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject } from 'rxjs';
 import { wsURL } from '@constants';
 
 @Injectable()
@@ -35,7 +35,7 @@ export class GlobalService {
     userLastUpdated: Date;
 
     constructor(private backend: BackendService, private router: Router) {
-        this.getUser(true); // Force the updating of the userProfile the first time the globalService starts.
+        // this.getUser(true); // Force the updating of the userProfile the first time the globalService starts.
     }
 
     /**
@@ -59,11 +59,11 @@ export class GlobalService {
     /**
      * Logout the user, clear the profile and also navigate to login.
      */
-    logout(navigateTo = '/pages/login', params = {}) {
-        this.backend.logout();
-        this.router.navigate([navigateTo, params]);
-        this.clearUser();
-    }
+    // logout(navigateTo = '/pages/login', params = {}) {
+    //     this.backend.logout();
+    //     this.router.navigate([navigateTo, params]);
+    //     this.clearUser();
+    // }
 
     /**
      * Resets all the models linked to a patient, this ensures no data is accidently leaked to some other user.
@@ -83,52 +83,52 @@ export class GlobalService {
      * @param navigateTo - The page which to navigate to after login was successful.
      * @param params - The params to send with the navigateTo params (These will be queryParams).
      */
-    login(username, password, navigateTo = '', params = {}): Promise<any> {
-        return new Promise(resolve => this.backend.login(username, password).then(res => {
-            if (res.result) {
-                this.router.navigate([navigateTo, params]);
-                this.getUser(true);
-                // this.createWebsocket();
-            };
-            resolve(res);
-        }));
-    }
+    // login(username, password, navigateTo = '', params = {}): Promise<any> {
+    //     return new Promise(resolve => this.backend.login(username, password).then(res => {
+    //         if (res.result) {
+    //             this.router.navigate([navigateTo, params]);
+    //             this.getUser(true);
+    //             // this.createWebsocket();
+    //         };
+    //         resolve(res);
+    //     }));
+    // }
 
     /**
      * Refresh the user profile from the backend.
      */
-    getUser(force = false) {
-        // Check if the user is still logged in.
-        return new Promise(resolve => () => {
-            this.backend.getLoggedIn().then(res => {
-                if (!res.result) {
-                    this.clearUser();
-                    this.router.navigate(['/pages/login']);
-                    resolve(false);
-                };
-            });
+    // getUser(force = false) {
+    //     // Check if the user is still logged in.
+    //     return new Promise(resolve => () => {
+    //         this.backend.getLoggedIn().then(res => {
+    //             if (!res.result) {
+    //                 this.clearUser();
+    //                 this.router.navigate(['/pages/login']);
+    //                 resolve(false);
+    //             };
+    //         });
 
-            // Get the time since the last update.
-            let date = new Date();
-            let minutes = this.userLastUpdated ? ((date.getTime() - this.userLastUpdated.getTime()) / 60000) : 1;
+    //         // Get the time since the last update.
+    //         let date = new Date();
+    //         let minutes = this.userLastUpdated ? ((date.getTime() - this.userLastUpdated.getTime()) / 60000) : 1;
 
-            // If it has been 1 minute since the last update, update the profile again. Unless if the update is forced or the patient has not been set yet.
-            if (minutes >= 1 || force) {
-                this.backend.getUser()
-                    .then(response => {
-                        if (response.result && response.data) {
-                            // Update user.
-                            this.user.value.update(response.data);
+    //         // If it has been 1 minute since the last update, update the profile again. Unless if the update is forced or the patient has not been set yet.
+    //         if (minutes >= 1 || force) {
+    //             this.backend.getUser()
+    //                 .then(response => {
+    //                     if (response.result && response.data) {
+    //                         // Update user.
+    //                         this.user.value.update(response.data);
 
-                            // Set the time the profile was updated.
-                            this.userLastUpdated = date;
-                        }
-                    })
-                    .catch(error => console.log('ERROR: ', error))
-            }
-            resolve(true);
-        });
-    }
+    //                         // Set the time the profile was updated.
+    //                         this.userLastUpdated = date;
+    //                     }
+    //                 })
+    //                 .catch(error => console.log('ERROR: ', error))
+    //         }
+    //         resolve(true);
+    //     });
+    // }
 
     /**
      * Register a subscription on the subsription list.

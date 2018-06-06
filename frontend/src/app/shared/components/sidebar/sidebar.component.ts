@@ -29,7 +29,7 @@ export class SidebarComponent {
         }
     }
 
-    onLogOut() {
-        this.globalService.logout();
-    }
+    // onLogOut() {
+    //     this.globalService.logout();
+    // }
 }

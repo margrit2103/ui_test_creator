@@ -7,15 +7,17 @@
   "author": "Keyboard Ninjas",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --ec true",
+    "start": "ng serve --proxy-config proxy.conf.json",
     "ng-build": "ng build --build-optimizer=false --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "electron": "ng build --build-optimizer=false --prod && electron .",
+    "electron:dev": "electron . --serve",
+    "electron:semi-dev": "ng build --build-optimizer=false --prod && electron .",
     "electron-aot": "ng build --prod && electron .",
     "win": "electron-builder -w",
-    "publish": "electron-builder build -w -p onTagOrDraft"
+    "publish": "electron-builder build -w -p onTagOrDraft",
+    "app-dev": "npm run start && npm run electron:dev"
   },
   "repository": {
     "type": "git",
@@ -25,11 +27,29 @@
     "appId": "com.keyboardninjas.tingus",
     "productName": "Tingus",
     "copyright": "Copyright © 2018 ${author}",
-    "files": ["./dist", "./renderer", "main.js", "updater.js"],
+    "files": [
+      "./dist",
+      "./renderer",
+      "main.js",
+      "updater.js"
+    ],
     "directories": {
       "output": "release-builds"
     },
-    "extraFiles": [{"from": "../backend/dist", "to": "."}, {"from": "../backend/kill_Backend.bat", "to": "./kill_Backend.bat"}, {"from": "../backend/settings.json", "to": "./settings.json"}],
+    "extraFiles": [
+      {
+        "from": "../backend/dist",
+        "to": "."
+      },
+      {
+        "from": "../backend/kill_Backend.bat",
+        "to": "./kill_Backend.bat"
+      },
+      {
+        "from": "../backend/settings.json",
+        "to": "./settings.json"
+      }
+    ],
     "win": {
       "publish": [
         "github"
@@ -55,25 +75,25 @@
     "jquery": "^3.2.1"
   },
   "devDependencies": {
-    "rxjs": "^6.1.0",
-    "core-js": "^2.4.1",
+    "@angular-devkit/build-angular": "~0.6.0",
     "@angular/animations": "6.0.0",
+    "@angular/cli": "6.0.0",
     "@angular/common": "6.0.0",
     "@angular/compiler": "6.0.0",
+    "@angular/compiler-cli": "6.0.0",
     "@angular/core": "6.0.0",
     "@angular/forms": "6.0.0",
     "@angular/http": "6.0.0",
     "@angular/platform-browser": "6.0.0",
     "@angular/platform-browser-dynamic": "6.0.0",
     "@angular/router": "6.0.0",
-    "@angular-devkit/build-angular": "~0.6.0",
-    "@angular/cli": "6.0.0",
-    "@angular/compiler-cli": "6.0.0",
     "@types/jasmine": "2.5.45",
     "@types/node": "~6.0.60",
     "codelyzer": "~3.0.1",
+    "core-js": "^2.4.1",
     "electron": "2.0.0",
     "electron-builder": "^20.13.4",
+    "eslint": "^4.19.1",
     "jasmine-core": "~2.6.2",
     "jasmine-spec-reporter": "~4.1.0",
     "karma": "~1.7.0",
@@ -83,6 +103,7 @@
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "~5.1.2",
+    "rxjs": "^6.1.0",
     "ts-node": "~3.0.4",
     "tslint": "~5.3.2",
     "typescript": "2.7.2",

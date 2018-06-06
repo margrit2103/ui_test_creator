@@ -38,7 +38,6 @@ export class TestScreen extends Screen implements OnInit {
 
     moveActionIndex(action, type) {
         const currentActionIndex = this.model.actions.indexOf(action);
-        console.log(currentActionIndex)
         if (type === 'decrease') {
             const previousActionIndex = this.model.actions.indexOf(action) - 1;
             this.model.actions.splice(previousActionIndex, 2, action, this.model.actions[previousActionIndex])

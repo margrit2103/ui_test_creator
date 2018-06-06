@@ -17,21 +17,21 @@ export class LoginComponent {
 
     constructor(public router: Router, public globalService: GlobalService) { }
 
-    onLoggedin() {
-        this.globalService.login(this.username, this.password, '/dashboard').then(res => {
-            if (res.result) {
-                this.error = false;
-                this.errorMessage = '';
-            } else {
-                this.error = true;
-                this.errorMessage = res.msg;
-            }
-        });
-    }
+    // onLoggedin() {
+    //     this.globalService.login(this.username, this.password, '/dashboard').then(res => {
+    //         if (res.result) {
+    //             this.error = false;
+    //             this.errorMessage = '';
+    //         } else {
+    //             this.error = true;
+    //             this.errorMessage = res.msg;
+    //         }
+    //     });
+    // }
 
-    processKey(key) {
-        if (key.keyCode === 13 && this.username && this.password) {
-            this.onLoggedin();
-        }
-    }
+    // processKey(key) {
+    //     if (key.keyCode === 13 && this.username && this.password) {
+    //         this.onLoggedin();
+    //     }
+    // }
 }

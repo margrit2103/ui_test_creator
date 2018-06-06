@@ -35,9 +35,9 @@ export class HeaderComponent implements OnInit {
         dom.classList.toggle('rtl');
     }
 
-    onLogOut() {
-        this.globalSerivce.logout();
-    }
+    // onLogOut() {
+    //     this.globalSerivce.logout();
+    // }
 
     openKeyboardNinjas() {
         window.open("https://www.keyboardninjas.co.za")

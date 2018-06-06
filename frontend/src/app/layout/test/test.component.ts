@@ -19,10 +19,10 @@ export class TestComponent {
     selectedTest: Test = null;
     selectedTests: Array<Test> = [];
     openTest: boolean = false;
-    @ViewChild("testScreen") testScreen: screenRender;
-    @ViewChild("testResultScreen") testResultScreen: screenRender;
+    @ViewChild('testScreen') testScreen: screenRender;
+    @ViewChild('testResultScreen') testResultScreen: screenRender;
 
-    constructor(private backend: BackendService) { }
+    constructor(private backend: BackendService) {}
 
     ngOnInit() {
         this.refreshTests();
@@ -40,10 +40,14 @@ export class TestComponent {
     }
 
     runTestSuite() {
-        let test = this.selectedTests.map(x => {
+        // const { remote } = require('electron');
+        // const win = remote.BrowserWindow.getFocusedWindow();
+        // win.minimize();
+        const test = this.selectedTests.map(x => {
             return { name: x.name, type: 'test' };
         })
-        this.testResultScreen.open({ model: { tests: test } });
+
+        this.testResultScreen.open({ model: { tests: test } }); // win: win
     }
 
     newTest() {

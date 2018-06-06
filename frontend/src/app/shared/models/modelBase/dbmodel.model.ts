@@ -20,10 +20,13 @@ const url = URL; // <-- This url will be used when posting it should be your ser
 // The format is as follows: http://URL:PORT/Module/Function?YourParamsURLSerialized
 // This should be handled in the function calls bellow. Take for example getClients()
 
-// The design of these models use the propery approach where you defined the field on the model properties itself (I would recommend this model design). To access any field on the class you would use it as follows:
-// data = {name: 'TestName'} -> Any field in here must be declared in the dbFields and also declared as a property in the model itself. Client model demostrates this.
-// a = new YourClass(data);
-// name = a.name -> this will return TestName.
+// The design of these models use the propery approach where you defined the field on the model,
+// properties itself (I would recommend this model design).
+// To access any field on the class you would use it as follows:
+//      data = {name: 'TestName'} -> Any field in here must be declared in the dbFields and also declared as a property in the model itself.
+//                                   Client model demostrates this.
+//      a = new YourClass(data);
+//      name = a.name -> this will return TestName.
 
 // ===================================================================
 // ======================= DEFAULT MODEL =============================
@@ -60,7 +63,7 @@ export abstract class DBModel {
     /**
      * Should this model be able to be saved.
      */
-    protected saveModel: boolean = true;
+    protected saveModel = true;
 
     /**
      * Should this model be able to be loaded by defualt.
@@ -115,7 +118,7 @@ export abstract class DBModel {
      * @param data {Object} - Data to update the class with.
      */
     protected _update(data) {
-        for (let key in data) {
+        for (const key in data) {
             if (this.hasOwnProperty(key)) {
                 if (this.modelFields.hasOwnProperty(key)) {
                     if (this[key] instanceof Array && data[key] instanceof Array && data[key]) {
@@ -144,7 +147,8 @@ export abstract class DBModel {
 
     /**
      * Temporarily update the model, this means you can still restore the model to it's old state using .restoreFromSnapshot.
-     * This will be usefull when you want to update this model and compare it to see if anything has changed from the update. Or incase someome changes their
+     * This will be usefull when you want to update this model and compare it to see if anything has changed from the update.
+     * Or incase someome changes their
      * minds after making changes to this model.
      * @param data {Object} - The data to temporarily update the model with.
      */
@@ -179,7 +183,7 @@ export abstract class DBModel {
      * Update the values within this class to the defualt values.
      */
     clearFields() {
-        for (let key of this.dbFields) {
+        for (const key of this.dbFields) {
             if (this.hasOwnProperty(key)) {
                 if (this.modelFields.hasOwnProperty(key)) {
                     if (this[key] instanceof Array) {
@@ -215,7 +219,7 @@ export abstract class DBModel {
      * @returns {Promise}.
      */
     protected serverPost(request: string, parameters: any = {}): Promise<any> {
-        let body = JSON.stringify(parameters);
+        const body = JSON.stringify(parameters);
         return this.http.post(url + request, body, options)
             .toPromise()
             .then(extractData)
@@ -227,7 +231,7 @@ export abstract class DBModel {
      * @returns {Object} - JSON format of this model.
      */
     values(return_null = false) {
-        let data = {}
+        const data = {}
         this.dbFields.forEach(e => {
             if (this.modelFields.hasOwnProperty(e) && this[e] !== null) {
                 if (this[e] instanceof Array) {
@@ -295,15 +299,16 @@ export abstract class DBModel {
 
     /**
      * Function to save the model.
-     * @returns {promise} - Returns a promise response if the update if false, returns a Observable that you can subscribe to if the update is true.
+     * @returns {promise} - Returns a promise response if the update if false,
+     *                      returns a Observable that you can subscribe to if the update is true.
      */
     save(): Promise<any> {
-        // If you would like the model to update itself after the save, just pass in the true on the save function. 
+        // If you would like the model to update itself after the save, just pass in the true on the save function.
         if (this.saveModel) {
-            let model = {};
-            let fields = this.values(true);
+            const model = {};
+            const fields = this.values(true);
             model[this.saveKey] = fields;
-            let body = JSON.stringify(model);
+            const body = JSON.stringify(model);
             this.snapshot = this.toString();
             return this.http.post(url + this._save_func, body, options)
                 .toPromise()
@@ -340,17 +345,17 @@ export abstract class DBModel {
     */
     load() {
         if (this.loadModel && this.loadable()) {
-            let model = {};
-            let fields = {};
+            const model = {};
+            const fields = {};
             this.loadFields.forEach(e => {
                 fields[e] = this[e];
             });
             model[this.saveKey] = fields;
-            let body = JSON.stringify(model);
+            const body = JSON.stringify(model);
             this.http.post(url + this._load_func, body, options)
                 .toPromise()
                 .then(res => {
-                    let response_data = extractData(res);
+                    const response_data = extractData(res);
                     if (response_data.result) {
                         this.update(response_data.data);
                     }

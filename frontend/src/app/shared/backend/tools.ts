@@ -3,14 +3,14 @@
  * @param {string} name - Name of the cookie to retrieve.
  */
 export function getCookie(name: string) {
-    let ca: Array<string> = document.cookie.split(';');
-    let caLen: number = ca.length;
-    let cookieName = `${name}=`;
+    const ca: Array<string> = document.cookie.split(';');
+    const caLen: number = ca.length;
+    const cookieName = `${name}=`;
     let c: string;
 
-    for (let i: number = 0; i < caLen; i += 1) {
+    for (let i = 0; i < caLen; i += 1) {
         c = ca[i].replace(/^\s+/g, '');
-        if (c.indexOf(cookieName) == 0) {
+        if (c.indexOf(cookieName) === 0) {
             return c.substring(cookieName.length, c.length);
         }
     }
@@ -33,10 +33,10 @@ export function deleteCookie(name: string) {
  * @param {string} path - Path to the cookie. Should probably not mess with this one kids.
  */
 export function setCookie(name: string, value: any, expireDays: number, path: string = '') {
-    let d: Date = new Date();
+    const d: Date = new Date();
     d.setTime(d.getTime() + expireDays * 24 * 60 * 60 * 1000);
-    let expires: string = `expires=${d.toUTCString()}`;
-    let cpath: string = path ? `; path=${path}` : '';
+    const expires = `expires=${d.toUTCString()}`;
+    const cpath: string = path ? `; path=${path}` : '';
     document.cookie = `${name}=${value}; ${expires}${cpath}`;
 }
 
@@ -46,24 +46,29 @@ export function setCookie(name: string, value: any, expireDays: number, path: st
  * @param {response} res - Response received from the server / backend.
  */
 export function extractData(res) {
-    let body = res.json();
+    const body = res.json();
     if (body.msg === 'NOT LOGGED IN') {
         deleteCookie('session_id');
         let current_addr = document.location.href
-        current_addr = current_addr.slice(current_addr.indexOf('https://') || current_addr.indexOf('http://') || 0, current_addr.indexOf('/'))
+        current_addr = current_addr.slice(current_addr.indexOf('https://') ||
+                                          current_addr.indexOf('http://') ||
+                                          0, current_addr.indexOf('/'))
         if (current_addr.indexOf('https://') > -1) {
-            window.location.href = 'https://' + current_addr + '/login' // This is here for now since the loggerService is not working and I am having trouble injecting the routerService ...
+            // This is here for now since the loggerService is not working and I am having trouble injecting the routerService ...
+            window.location.href = 'https://' + current_addr + '/login'
         } else if (current_addr.indexOf('http://') > -1) {
-            window.location.href = 'http://' + current_addr + '/login' // This is here for now since the loggerService is not working and I am having trouble injecting the routerService ...
+            // This is here for now since the loggerService is not working and I am having trouble injecting the routerService ...
+            window.location.href = 'http://' + current_addr + '/login'
         } else {
-            window.location.href = current_addr + '/login' // This is here for now since the loggerService is not working and I am having trouble injecting the routerService ...
+            // This is here for now since the loggerService is not working and I am having trouble injecting the routerService ...
+            window.location.href = current_addr + '/login'
         }
     }
     return body || {};
 }
 
 /**
- * Function that handles any error that has happened in the backend, the backend already handles this so this should NEVER be executed, 
+ * Function that handles any error that has happened in the backend, the backend already handles this so this should NEVER be executed,
  * but just for piece of mind this is here.
  * @param {response|any} error - Error that has occured.
  */
@@ -72,8 +77,8 @@ export function handleError(error) {
     console.log('BACKEND SERVICE ERROR', error);
     let errMsg: string;
     if (error instanceof Response) {
-        let body: any = error.json();
-        let err = body.error || JSON.stringify(body);
+        const body: any = error.json();
+        const err = body.error || JSON.stringify(body);
         errMsg = `${error.status} - ${error.statusText || ''} ${err}`;
     } else {
         errMsg = error.message ? error.message : error.toString();

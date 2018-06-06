@@ -18,12 +18,13 @@ export class TestResultScreen extends Screen implements OnInit {
         super();
         this.noModel = true;                // This Screen does not have a valid model.
         this.options.save = false;          // Dont show the save button.
-        this.screenName = "Test Results";   // Name of the screen.
+        this.screenName = 'Test Results';   // Name of the screen.
     }
 
     ngOnInit() {
-        this.backend.runTestSuite(this.model).then(res => {
-            this.results = this.traverseTests(res.data);          
+        this.backend.runTestSuite(this.model.model).then(res => {
+            this.results = this.traverseTests(res.data);
+            // this.model.win.maximize();
         });
     }
 
@@ -42,9 +43,9 @@ export class TestResultScreen extends Screen implements OnInit {
      * @param {array} target - The target array to put all the tests in, will recursive call the function with this array.
      * @returns {array} target array.
      */
-    traverseTests(test, target=[]) {
+    traverseTests(test, target= []) {
         test.forEach(t => {
-            if(t.type === 'suite') {
+            if (t.type === 'suite') {
                 this.traverseTests(t.results, target);
             } else if (t.type === 'test') {
                 target.push(t);

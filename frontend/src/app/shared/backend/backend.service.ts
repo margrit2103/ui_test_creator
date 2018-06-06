@@ -28,8 +28,10 @@ export class BackendService {
 
     /**
      * Function that post the request and serializes the parameters to the backend.
-     * @param request - The request that is going to be made to the backend. For example in the case of getClients > http://127.0.0.1:8080/booking/getClients
-     * @param parameters - Parameters that should be sent to the backend , these are the positional arguments in the python code of the function your requesting.
+     * @param request - The request that is going to be made to the backend.
+     *                  For example in the case of getClients > http://127.0.0.1:8080/booking/getClients
+     * @param parameters - Parameters that should be sent to the backend,
+     *                     these are the positional arguments in the python code of the function your requesting.
      */
     protected serverPost(request: string, parameters: any = {}): Promise<any> {
         const body = JSON.stringify(parameters);
@@ -40,9 +42,10 @@ export class BackendService {
     }
 
     // /**
-    //  * The same as the above function, accept it returns a observable on which you can subscribe and wait until data is returned (NON ASYNC).
-    //  * @param request 
-    //  * @param parameters 
+    //  * The same as the above function, accept it returns a observable
+    //    on which you can subscribe and wait until data is returned (NON ASYNC).
+    //  * @param request
+    //  * @param parameters
     //  */
     // protected serverObservePost(request: string, parameters: any = {}): Observable<any> {
     //     let body = JSON.stringify(parameters);
@@ -108,58 +111,60 @@ export class BackendService {
     }
 
     /**
-     * Function that logs the user in with the supplied password and username, if the login is not successful it will be logged in the console.
+     * Function that logs the user in with the supplied password and username,
+     * if the login is not successful it will be logged in the console.
      * @param username - Username to login with.
      * @param password - Password to login with.
      */
-    login(username, password): Promise<any> {
-        return new Promise(resolve => {
-            this.serverPost('login', { username: username, password: password })
-                .then(response => {
-                    if (!response.result) {
-                        // If the login was unsuccesful completely delete the cookie of session.
-                        deleteCookie('session_id');
-                    }
-                    return resolve(response);
-                })
-                .catch(error => {
-                    handleError(error);
-                    resolve({ result: false, msg: error });
-                })
-        })
-    }
+    // login(username, password): Promise<any> {
+    //     return new Promise(resolve => {
+    //         this.serverPost('login', { username: username, password: password })
+    //             .then(response => {
+    //                 if (!response.result) {
+    //                     // If the login was unsuccesful completely delete the cookie of session.
+    //                     deleteCookie('session_id');
+    //                 }
+    //                 return resolve(response);
+    //             })
+    //             .catch(error => {
+    //                 handleError(error);
+    //                 resolve({ result: false, msg: error });
+    //             })
+    //     })
+    // }
 
     /**
-     * Retrieves the information of the current logged in user. This would mainly be used for loggin checks , but login checks are already done in the backend.
+     * Retrieves the information of the current logged in user.
+     * This would mainly be used for loggin checks , but login checks are already done in the backend.
      */
-    getUser(): Promise<any> {
-        return this.post('getUser');
-    }
+    // getUser(): Promise<any> {
+    //     return this.post('getUser');
+    // }
 
     /**
      * Returns a boolean if the user is logged in or not.
      */
-    getLoggedIn(): Promise<any> {
-        return this.post('getLoggedIn');
-    }
+    // getLoggedIn(): Promise<any> {
+    //     return this.post('getLoggedIn');
+    // }
 
     /**
      * Logs the current logged in user out.
      */
-    logout(): Promise<any> {
-        return new Promise(resolve => {
-            this.serverPost('logout')
-                .then(response => {
-                    deleteCookie('session_id');
-                    this.router.navigate(['/login']);
-                    return resolve(response);
-                })
-                .catch(error => {
-                    handleError(error);
-                    resolve({ result: false, msg: error });
-                })
-        })
-    }
+    // logout(): Promise<any> {
+    //     return new Promise(resolve => {
+    //         this.serverPost('logout')
+    //             .then(response => {
+    //                 deleteCookie('session_id');
+    //                 this.router.navigate(['/login']);
+    //                 return resolve(response);
+    //             })
+    //             .catch(error => {
+    //                 handleError(error);
+    //                 resolve({ result: false, msg: error });
+    //             })
+    //     })
+    // }
     // ===========================================================================================
     // ===========================================================================================
 }

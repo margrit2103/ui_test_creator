@@ -27,7 +27,7 @@ import { BackendService } from '@backend';
         .suggestions {
             border: 1px solid #ababab;
             border-radius: 5px;
-            position: fixed;
+            position: absolute;
             z-index: 2000;
             background-color: white;
         }
@@ -46,10 +46,10 @@ import { BackendService } from '@backend';
     `]
 })
 
-export class AutocompleteComponent implements OnInit{
+export class AutocompleteComponent implements OnInit {
     @Input() options: Array<any> = [];
     @Input() placeholder: string = 'Start typing to search ...';
-    @Input() queryText: string = '';
+    @Input() queryText: string;
     @Input() filterOn: string = 'description';
     @Input() optionText: string = 'description';
     @Input() clear: boolean = true;
@@ -107,7 +107,7 @@ export class AutocompleteComponent implements OnInit{
     select(item) {
         this.optionSelected.emit(item);
         this.filteredOptions = [];
-        if(this.clear) {
+        if (this.clear) {
             this.query = '';
         } else {
             this.query = item[this.optionText];

@@ -2,16 +2,21 @@ import errno
 import json
 import logging
 import os
+import sys
 import time
 
-import pyautogui
-from lackey import click as _click
-from lackey import doubleClick as _doubleClick
-from lackey import rightClick as _rightClick
-from lackey import wait as _wait
-
 logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO)
-SAVE_FOLDER = os.path.normpath(os.getenv("PROGRAMDATA") + '/TingusData' + '/save_files/')
+
+if sys.platform == "linux" or sys.platform == "linux2":
+    logging.info("Linux OS Detected, running test will be Disabled.")
+    SAVE_FOLDER = os.path.normpath(os.getcwd() + '/TingusData' +'/save_files/')
+elif sys.platform == "win32":
+    import pyautogui
+    from lackey import click as _click
+    from lackey import doubleClick as _doubleClick
+    from lackey import rightClick as _rightClick
+    from lackey import wait as _wait
+    SAVE_FOLDER = os.path.normpath(os.getenv("PROGRAMDATA") + '/TingusData' + '/save_files/')
 
 try:
     with open("settings.json") as settings_file:
@@ -103,33 +108,35 @@ class Main_Routes:
         # sorted(list_to_be_sorted, key=lambda k: k['order'])
         # Load all the test before you begin to execute them. So that the tests are equally as fast.
         payload = await model.json()
-        payload = payload['model']
 
         return self.web.json_response(self.formatResponse(self._runTestSuite(payload)))
 
-    def _runTestSuite(self, model):
-        suite_results = []
-        print('_runTestSuite Model: ', model)
-        for index, test in enumerate(model['tests']):
-            if test['type'] == 'suite':
-                test_suite = self._load_test_suite(test['name'])
-                suite_results.append({
-                    "name": test_suite["name"],
-                    "index": index,
-                    "type": "suite",
-                    "results": self._runTestSuite(test_suite)
-                })
-            elif test['type'] == 'test':
-                test_ = self._load_test(test['name'])
-                suite_results.append({
-                    "name": test_["name"],
-                    "index": index,
-                    "type": "test",
-                    "results": self._run_test(test_)
-                })
-        print("Test Results: ", suite_results)
+    if sys.platform == "linux" or sys.platform == "linux2":
+        logging.info("Run Test Suite disabled")
+    elif sys.platform == "win32":
+        def _runTestSuite(self, model):
+            suite_results = []
+            print('_runTestSuite Model: ', model)
+            for index, test in enumerate(model['tests']):
+                if test['type'] == 'suite':
+                    test_suite = self._load_test_suite(test['name'])
+                    suite_results.append({
+                        "name": test_suite["name"],
+                        "index": index,
+                        "type": "suite",
+                        "results": self._runTestSuite(test_suite)
+                    })
+                elif test['type'] == 'test':
+                    test_ = self._load_test(test['name'])
+                    suite_results.append({
+                        "name": test_["name"],
+                        "index": index,
+                        "type": "test",
+                        "results": self._run_test(test_)
+                    })
+            print("Test Results: ", suite_results)
 
-        return suite_results
+            return suite_results
 
     async def runTest(self, model):
         payload = await model.json()
@@ -137,55 +144,52 @@ class Main_Routes:
 
         return self.web.json_response(self.formatResponse(self._run_test(payload)))
 
-    def _run_test(self, model):
-        test_result =  {
-            "failed_actions": [],
-            "success_actions": []
-        }
-        time.sleep(SETTINGS_FILE.get("testSettings", {}).get("runTestDelay", 5))
-        for index, action in enumerate(model['actions']):
-            try:
-                if action['action'] == 'click':
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        _click(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'))
-                if action['action'] == 'r_click':
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        _rightClick(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'))
-                if action['action'] == 'doubleclick':
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        _doubleClick(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'))
-                if action['action'] == 'wait':
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        _wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay']))
-                if action['action'] == 'clickwait':
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        _click(_wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
-                if action['action'] == 'type':
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        pyautogui.typewrite(action['data'])
-                if action['action'] == 'keycombo':
-                    keys = action['data'].split('+')
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        pyautogui.hotkey(*keys)
-                if action['action'] == 'keypress':
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        pyautogui.typewrite(action['data'])
-                if action['action'] == 'close':
-                    for _ in range(int(action.get('repeat', '1') or '1')):
-                        pyautogui.hotkey('alt', 'f4')
-                test_result["success_actions"].append({
-                    "index": index,
-                    "action": action["action"],
-                    "data": action["data"]
-                })
-            except Exception as ex:
-                test_result["failed_actions"].append({
-                    "index": index,
-                    "action": action["action"],
-                    "data": action["data"],
-                    "error": str(ex.__doc__)
-                })
-        return test_result
+    if sys.platform == "linux" or sys.platform == "linux2":
+        logging.info("Run test disabled")
+    elif sys.platform == "win32":
+        def _run_test(self, model):
+            test_result =  {
+                "failed_actions": [],
+                "success_actions": []
+            }
+            time.sleep(SETTINGS_FILE.get("testSettings", {}).get("runTestDelay", 5))
+            for index, action in enumerate(model['actions']):
+                try:
+                    if action['action'] == 'click':
+                        for _ in range(int(action.get('repeat', '1') or '1')):
+                            _click(_wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png')))
+                    if action['action'] == 'r_click':
+                        for _ in range(int(action.get('repeat', '1') or '1')):
+                            _rightClick(_wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png')))
+                    if action['action'] == 'doubleclick':
+                        for _ in range(int(action.get('repeat', '1') or '1')):
+                            _doubleClick(_wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png')))
+                    if action['action'] == 'wait':
+                        for _ in range(int(action.get('repeat', '1') or '1')):
+                            _wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay']))
+                    if action['action'] == 'type':
+                        for _ in range(int(action.get('repeat', '1') or '1')):
+                            pyautogui.typewrite(action['data'])
+                    if action['action'] == 'keycombo':
+                        keys = action['data'].split('+')
+                        for _ in range(int(action.get('repeat', '1') or '1')):
+                            pyautogui.hotkey(*keys)
+                    if action['action'] == 'keypress':
+                        for _ in range(int(action.get('repeat', '1') or '1')):
+                            pyautogui.typewrite(action['data'])
+                    test_result["success_actions"].append({
+                        "index": index,
+                        "action": action["action"],
+                        "data": action["data"]
+                    })
+                except Exception as ex:
+                    test_result["failed_actions"].append({
+                        "index": index,
+                        "action": action["action"],
+                        "data": action["data"],
+                        "error": str(ex.__doc__)
+                    })
+            return test_result
 
     async def searchTests(self, search_term):
         payload = await search_term.json()
