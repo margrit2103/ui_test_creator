@@ -16,13 +16,15 @@ else:
     from lackey import doubleClick as _doubleClick
     from lackey import rightClick as _rightClick
     from lackey import wait as _wait
-    SAVE_FOLDER = os.path.normpath(os.getenv("PROGRAMDATA") + '/TingusData' + '/save_files/')
+    SAVE_FOLDER = os.path.normpath(
+        os.getenv("PROGRAMDATA") + '/TingusData' + '/save_files/')
 
 try:
     with open("settings.json") as settings_file:
         SETTINGS_FILE = json.load(settings_file)
 except:
     raise Exception("NO SETTINGS JSON FILE FOUND")
+
 
 class Main_Routes:
     def __init__(self, web):
@@ -31,8 +33,8 @@ class Main_Routes:
 
     def formatResponse(self, data):
         ret = {
-            "result": 'HARDCODED VALUES RESULT',
-            "msg": 'HARDCODED VALUES MSG',
+            "result": None,
+            "msg": None,
             "data": data
         }
 
@@ -50,8 +52,10 @@ class Main_Routes:
     def _getTests(self):
         tests = []
         for file in os.listdir(os.path.normpath(SAVE_FOLDER + '/tests/')):
-            description = json.load(open(os.path.normpath(SAVE_FOLDER + '/tests/' + file)))['description']
-            tests.append({ 'name' : file[:-5], 'description': description, 'type': 'test'})
+            description = json.load(open(os.path.normpath(
+                SAVE_FOLDER + '/tests/' + file)))['description']
+            tests.append(
+                {'name': file[:-5], 'description': description, 'type': 'test'})
         return tests
 
     async def getSuites(self, request):
@@ -60,8 +64,10 @@ class Main_Routes:
     def _getSuites(self):
         tests = []
         for file in os.listdir(os.path.normpath(SAVE_FOLDER + '/suites/')):
-            description = json.load(open(os.path.normpath(SAVE_FOLDER + '/suites/' + file)))['description']
-            tests.append({ 'name': file[:-5], 'description': description, 'type': 'suite'})
+            description = json.load(open(os.path.normpath(
+                SAVE_FOLDER + '/suites/' + file)))['description']
+            tests.append(
+                {'name': file[:-5], 'description': description, 'type': 'suite'})
         return tests
 
     async def getImages(self, request):
@@ -92,7 +98,8 @@ class Main_Routes:
         return self.web.json_response(self.formatResponse(self._load_test_suite(payload)))
 
     def _load_test_suite(self, test_name):
-        json_data = open(os.path.normpath(SAVE_FOLDER + '/suites/' + test_name + '.json'))
+        json_data = open(os.path.normpath(
+            SAVE_FOLDER + '/suites/' + test_name + '.json'))
         return json.load(json_data)
 
     async def loadTest(self, test_name):
@@ -101,7 +108,8 @@ class Main_Routes:
         return self.web.json_response(self.formatResponse(self._load_test(payload)))
 
     def _load_test(self, test_name):
-        json_data = open(os.path.normpath(SAVE_FOLDER + '/tests/' + test_name + '.json'))
+        json_data = open(os.path.normpath(
+            SAVE_FOLDER + '/tests/' + test_name + '.json'))
         return json.load(json_data)
 
     async def runTestSuite(self, model):
@@ -149,28 +157,34 @@ class Main_Routes:
         logging.info("Run Test Suite disabled")
     else:
         def _run_test(self, model):
-            test_result =  {
+            test_result = {
                 "failed_actions": [],
                 "success_actions": []
             }
-            time.sleep(SETTINGS_FILE.get("testSettings", {}).get("runTestDelay", 5))
+            time.sleep(SETTINGS_FILE.get(
+                "testSettings", {}).get("runTestDelay", 5))
             for index, action in enumerate(model['actions']):
                 try:
                     if action['action'] == 'click':
                         for _ in range(int(action.get('repeat', '1') or '1')):
-                            _click(_wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
+                            _click(_wait(os.path.normpath(
+                                SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
                     if action['action'] == 'r_click':
                         for _ in range(int(action.get('repeat', '1') or '1')):
-                            _rightClick(_wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
+                            _rightClick(_wait(os.path.normpath(
+                                SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
                     if action['action'] == 'doubleclick':
                         for _ in range(int(action.get('repeat', '1') or '1')):
-                            _doubleClick(_wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
+                            _doubleClick(_wait(os.path.normpath(
+                                SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
                     if action['action'] == 'wait':
                         for _ in range(int(action.get('repeat', '1') or '1')):
-                            _wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay']))
+                            _wait(os.path.normpath(SAVE_FOLDER + '/images/' +
+                                                   action['data'] + '.png'), int(action['delay']))
                     if action['action'] == 'clickwait':
                         for _ in range(int(action.get('repeat', '1') or '1')):
-                            _click(_wait(os.path.normpath(SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
+                            _click(_wait(os.path.normpath(
+                                SAVE_FOLDER + '/images/' + action['data'] + '.png'), int(action['delay'])))
                     if action['action'] == 'type':
                         for _ in range(int(action.get('repeat', '1') or '1')):
                             pyautogui.typewrite(action['data'])
@@ -226,6 +240,7 @@ class FileHandling:
     EXAMPLE USAGE: with safe_open_w('/Users/bill/output/output-text.txt') as f:
                        f.write(stuff_to_file)
     """
+
     def _mkdir_p(self, path):
         try:
             os.makedirs(path)
