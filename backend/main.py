@@ -23,7 +23,7 @@ if sys.platform == "linux" or sys.platform == "linux2":
 else:
     save_folder_path = os.path.normpath(os.getenv("PROGRAMDATA") + '/TingusData' +'/save_files/')
 
-folder_names = ['images', 'tests', 'suites', 'command_actions']
+folder_names = ['images', 'tests', 'suites', 'command_actions', 'logs']
 for folder_name in folder_names:
     path = os.path.normpath(save_folder_path + '/' + folder_name + '/')
     try:
